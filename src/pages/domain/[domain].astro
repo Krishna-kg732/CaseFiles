@@ -1,0 +1,57 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import CaseCard from '@components/case/CaseCard.astro';
+import { getAllCases, DOMAIN_LABELS } from '@lib/cases';
+import type { Domain } from '@types/case';
+
+export async function getStaticPaths() {
+  const domains: Domain[] = [
+    'database', 'networking', 'infra', 'auth',
+    'storage', 'queue', 'frontend', 'security', 'other',
+  ];
+  return domains.map((domain) => ({
+    params: { domain },
+    props: { domain },
+  }));
+}
+
+const { domain } = Astro.props as { domain: Domain };
+const allCases = await getAllCases();
+const cases = allCases.filter((c) => c.data.domain === domain);
+const label = DOMAIN_LABELS[domain];
+---
+
+<BaseLayout
+  title={`${label} Cases`}
+  description={`All production incident postmortems in the ${label} domain.`}
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <!-- Header -->
+    <div class="mb-8">
+      <a href="/" class="inline-flex items-center gap-2 font-mono text-xs text-ink-muted dark:text-dark-muted hover:text-stamp-red transition-colors mb-4">
+        ← Back to all cases
+      </a>
+      <h1 class="font-serif text-3xl lg:text-4xl font-bold text-ink dark:text-dark-text">
+        {label}
+      </h1>
+      <p class="font-mono text-sm text-ink-muted dark:text-dark-muted mt-1">
+        {cases.length} case{cases.length !== 1 ? 's' : ''} filed
+      </p>
+    </div>
+
+    {cases.length > 0 ? (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {cases.map((c) => (
+          <CaseCard slug={c.slug} data={c.data} />
+        ))}
+      </div>
+    ) : (
+      <div class="text-center py-16">
+        <span class="text-5xl mb-4 block">📂</span>
+        <p class="font-mono text-sm text-ink-muted dark:text-dark-muted">
+          No cases filed in the {label} domain yet.
+        </p>
+      </div>
+    )}
+  </div>
+</BaseLayout>

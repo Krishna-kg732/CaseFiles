@@ -1,0 +1,87 @@
+---
+import BaseLayout from '@layouts/BaseLayout.astro';
+import FilingCabinet from '@components/index/FilingCabinet.astro';
+import SearchBar from '@components/index/SearchBar.astro';
+import SeverityCalendar from '@components/index/SeverityCalendar.astro';
+import { getAllCases } from '@lib/cases';
+
+const cases = await getAllCases();
+const activeCases = cases.filter((c) => c.data.status === 'investigating');
+---
+
+<BaseLayout title="CaseFiles">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <!-- Page header -->
+    <div class="mb-8">
+      <h1 class="font-serif text-4xl lg:text-5xl font-bold text-ink dark:text-dark-text mb-2">
+        Case Files
+      </h1>
+      <p class="font-sans text-ink-muted dark:text-dark-muted text-lg">
+        Production system failure postmortems, documented and archived.
+      </p>
+    </div>
+
+    <!-- Active investigations alert -->
+    {activeCases.length > 0 && (
+      <div class="mb-8 p-4 bg-stamp-red/5 border border-stamp-red/20 rounded-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2 h-2 rounded-full bg-stamp-red animate-pulse"></span>
+          <span class="font-mono text-xs font-bold text-stamp-red uppercase tracking-wider">
+            Active Investigations
+          </span>
+        </div>
+        <div class="space-y-2">
+          {activeCases.map((c) => (
+            <a
+              href={`/cases/${c.slug}`}
+              class="block p-2 bg-manila-50 dark:bg-dark-card rounded-sm hover:bg-manila-100 dark:hover:bg-dark-border transition-colors"
+            >
+              <span class="font-mono text-xs text-ink-muted dark:text-dark-muted">#{c.data.caseNumber}</span>
+              <span class="text-sm text-ink dark:text-dark-text ml-2">{c.data.title}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <div class="lg:flex lg:gap-8">
+      <!-- Main content -->
+      <div class="lg:flex-1">
+        <!-- Search -->
+        <SearchBar />
+
+        <!-- Filing cabinet with domain tabs -->
+        <FilingCabinet />
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="hidden lg:block lg:w-72 lg:flex-shrink-0 mt-8 lg:mt-0 space-y-6">
+        <SeverityCalendar />
+
+        <!-- Quick stats -->
+        <div class="folder-card p-4">
+          <h3 class="font-mono text-xs font-bold uppercase tracking-wider text-ink-muted dark:text-dark-muted mb-3 flex items-center gap-2">
+            <span class="w-5 h-0.5 bg-stamp-red"></span>
+            Statistics
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            <div class="flex justify-between">
+              <span class="text-ink-muted dark:text-dark-muted">Total cases</span>
+              <span class="text-ink dark:text-dark-text font-bold">{cases.length}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-ink-muted dark:text-dark-muted">P0 incidents</span>
+              <span class="text-stamp-red font-bold">
+                {cases.filter((c) => c.data.severity === 'P0').length}
+              </span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-ink-muted dark:text-dark-muted">Active</span>
+              <span class="text-stamp-amber font-bold">{activeCases.length}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</BaseLayout>

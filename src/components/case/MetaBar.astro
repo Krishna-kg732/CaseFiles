@@ -1,0 +1,85 @@
+---
+import { computeBlastRadius } from '@lib/cases';
+
+interface Props {
+  duration: string;
+  mttr?: string;
+  affectedUsers?: number;
+  totalUsers?: number;
+  affectedRegions?: string[];
+  systems: string[];
+}
+
+const { duration, mttr, affectedUsers, totalUsers, affectedRegions, systems } = Astro.props;
+const blastRadius = computeBlastRadius(affectedUsers, totalUsers);
+---
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <!-- Duration -->
+  <div class="metric-card">
+    <span class="text-[10px] text-ink-muted dark:text-dark-muted uppercase tracking-widest mb-1">
+      Duration
+    </span>
+    <span class="text-xl font-bold text-ink dark:text-dark-text">
+      {duration}
+    </span>
+  </div>
+
+  <!-- Affected Users -->
+  <div class="metric-card">
+    <span class="text-[10px] text-ink-muted dark:text-dark-muted uppercase tracking-widest mb-1">
+      Affected Users
+    </span>
+    <span class="text-xl font-bold text-ink dark:text-dark-text">
+      {affectedUsers != null ? affectedUsers.toLocaleString() : '—'}
+    </span>
+  </div>
+
+  <!-- Blast Radius -->
+  <div class="metric-card">
+    <span class="text-[10px] text-ink-muted dark:text-dark-muted uppercase tracking-widest mb-1">
+      Blast Radius
+    </span>
+    {blastRadius !== null ? (
+      <div class="w-full mt-1">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-xl font-bold text-ink dark:text-dark-text">{blastRadius}%</span>
+        </div>
+        <div class="w-full bg-manila-300 dark:bg-dark-border rounded-full h-2 overflow-hidden">
+          <div
+            class={`h-full rounded-full transition-all duration-700 ${
+              blastRadius >= 50 ? 'bg-stamp-red' : blastRadius >= 25 ? 'bg-stamp-amber' : 'bg-stamp-green'
+            }`}
+            style={`width: ${blastRadius}%`}
+          ></div>
+        </div>
+      </div>
+    ) : (
+      <span class="text-xl font-bold text-ink dark:text-dark-text">—</span>
+    )}
+  </div>
+
+  <!-- MTTR -->
+  <div class="metric-card">
+    <span class="text-[10px] text-ink-muted dark:text-dark-muted uppercase tracking-widest mb-1">
+      MTTR
+    </span>
+    <span class="text-xl font-bold text-ink dark:text-dark-text">
+      {mttr ?? '—'}
+    </span>
+  </div>
+</div>
+
+<!-- Affected Regions -->
+{affectedRegions && affectedRegions.length > 0 && (
+  <div class="flex flex-wrap items-center gap-2 mb-6">
+    <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted uppercase tracking-widest">
+      Regions:
+    </span>
+    {affectedRegions.map((region) => (
+      <span class="inline-flex items-center px-2 py-0.5 rounded-sm bg-stamp-red/5 text-ink dark:text-dark-text font-mono text-xs border border-stamp-red/20">
+        🌍 {region}
+      </span>
+    ))}
+  </div>
+)}

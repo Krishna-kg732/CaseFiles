@@ -1,0 +1,58 @@
+---
+import SEOHead from '@components/global/SEOHead.astro';
+import Nav from '@components/global/Nav.astro';
+import Footer from '@components/global/Footer.astro';
+import '@styles/global.css';
+import { ViewTransitions } from 'astro:transitions';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: string;
+}
+
+const {
+  title,
+  description = 'CaseFiles — Production system failure postmortems, documented as criminal case files.',
+  ogImage,
+  ogType = 'website',
+} = Astro.props;
+
+const fullTitle = title === 'CaseFiles' ? title : `${title} | CaseFiles`;
+---
+
+<!doctype html>
+<html lang="en" class="">
+  <head>
+    <SEOHead
+      title={fullTitle}
+      description={description}
+      ogImage={ogImage}
+      ogType={ogType}
+    />
+    <ViewTransitions />
+  </head>
+  <body class="min-h-screen flex flex-col paper-texture">
+    <Nav />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+
+    <script is:inline>
+      // Dark mode initialization — runs before paint to avoid flash
+      function applyTheme() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+      applyTheme();
+      // Re-apply after View Transitions swap (before paint)
+      document.addEventListener('astro:after-swap', applyTheme);
+    </script>
+  </body>
+</html>

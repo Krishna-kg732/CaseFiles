@@ -1,0 +1,86 @@
+---
+import type { TimelineEvent } from '@types/case';
+
+interface Props {
+  events: TimelineEvent[];
+}
+
+const { events } = Astro.props;
+---
+
+<div class="relative" id="timeline-container">
+  <!-- Red vertical thread -->
+  <div class="timeline-thread" id="timeline-thread"></div>
+
+  <!-- Timeline events -->
+  <div class="space-y-8">
+    {events.map((event, index) => (
+      <div
+        class={`timeline-node ${event.type ?? ''} opacity-0`}
+        data-timeline-index={index}
+      >
+        <!-- Time badge -->
+        <div class="flex items-center gap-3 mb-1.5">
+          <span class="font-mono text-xs font-bold text-ink dark:text-dark-text bg-manila-200 dark:bg-dark-card px-2 py-0.5 rounded-sm border border-manila-300 dark:border-dark-border">
+            {event.time}
+          </span>
+          {event.type && (
+            <span class={`font-mono text-[10px] uppercase tracking-wider ${
+              event.type === 'trigger' ? 'text-stamp-red' :
+              event.type === 'escalation' ? 'text-stamp-amber' :
+              event.type === 'discovery' ? 'text-yellow-600' :
+              event.type === 'mitigation' ? 'text-blue-600' :
+              event.type === 'resolution' ? 'text-stamp-green' :
+              'text-ink-muted'
+            }`}>
+              {event.type}
+            </span>
+          )}
+        </div>
+
+        <!-- Event title -->
+        <h4 class="font-sans font-semibold text-ink dark:text-dark-text mb-1">
+          {event.event}
+        </h4>
+
+        <!-- Description -->
+        <p class="text-sm text-ink-muted dark:text-dark-muted leading-relaxed">
+          {event.description}
+        </p>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  // ─── IntersectionObserver for timeline node reveal ───────
+  document.addEventListener('astro:page-load', () => {
+    const nodes = document.querySelectorAll<HTMLElement>('[data-timeline-index]');
+    if (nodes.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            el.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+            el.style.opacity = '1';
+            el.style.transform = 'translateX(0)';
+            observer.unobserve(el);
+          }
+        }
+      },
+      {
+        threshold: 0.2,
+        rootMargin: '0px 0px -50px 0px',
+      },
+    );
+
+    for (const node of nodes) {
+      // Set initial hidden state
+      node.style.opacity = '0';
+      node.style.transform = 'translateX(-10px)';
+      observer.observe(node);
+    }
+  });
+</script>

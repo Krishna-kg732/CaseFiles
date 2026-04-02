@@ -1,0 +1,517 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ─── Font imports ──────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  /* ─── CSS Custom Properties ─────────────────────── */
+  :root {
+    --color-manila-paper: #fdf8f0;
+    --color-manila-dark:  #f4ddb2;
+    --color-ink:          #1a1410;
+    --color-ink-muted:    #6b5e4f;
+    --color-ink-faint:    #a89880;
+    --color-stamp-red:    #9b1b1b;
+    --color-stamp-amber:  #b45309;
+    --color-stamp-green:  #166534;
+    --color-folder-bg:    #f5edd8;
+    --color-folder-tab:   #e8d9b8;
+    --color-progress-bar: #9b1b1b;
+    --color-paper:        #fdf8f0;
+    --color-paper-darker: #e8d9b8;
+    --color-rule:         #d4c5a8;
+    --reading-progress:   0%;
+  }
+
+  .dark {
+    --color-manila-paper: #1a1a18;
+    --color-manila-dark:  #2a2520;
+    --color-ink:          #e8e0d4;
+    --color-ink-muted:    #a09888;
+    --color-ink-faint:    #6b6058;
+    --color-stamp-red:    #a04040;
+    --color-stamp-amber:  #a87235;
+    --color-stamp-green:  #2d6a4f;
+    --color-folder-bg:    #242018;
+    --color-folder-tab:   #3d3530;
+    --color-progress-bar: #a04040;
+    --color-paper:        #1e1c18;
+    --color-paper-darker: #2a2520;
+    --color-rule:         #3d3530;
+  }
+
+  /* ─── Base resets & defaults ────────────────────── */
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply text-ink font-sans;
+    background-color: #fdf8f0;
+    min-height: 100vh;
+  }
+
+  .dark body {
+    @apply text-dark-text;
+    background-color: #1a1208;
+  }
+
+  /* Grain overlay — tiny PNG base64, cross-browser reliable */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: -50%;
+    width: 200%;
+    height: 200%;
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAMAAAAp4XiDAAAAUVBMVEWFhYWDg4N3d3dtbW17e3t1dXWBgYGHh4t5eXlzc3OLi4ubm5uVlZWPj4+NjY19fX2JiYl/f39ra2uRkZGZmZlpaWmXl5dvb29xcXGTk5NnZ2c8TV1mAAAAG3RSTlNAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAvEOwtAAAFVklEQVR4XpWWB67c2BUFb3g557T/hRo9/WUMZHlgr4Bg8Z4qQgQJlHI4A8SzFVrapvmTF9O7dmYRFZ60YiBhJRCgh1FYhiLAmdvX0CzTOpNE77ME0Zty/nWWzchDtiqrmQDeuv3powQ5ta2eN0FY0InkqDD73lT9c9lEzwUNqgFHs9VQce3TVClFCQrSTfOiYkVJQBmpbq2L6iZavPnAPcoU0dSw0SUTqz/GtrGuXfbyyBniKykOWQWGqwwMA7QiYAxi+IlPdqo+hYHnUt5ZPfnsHJyNiDtnpJyayNBkF6cWoYGAMY92ZBKLseWPkYMlyYSaitKd0FnpmQQ81IjmceHi/6cANPqNoU+vqAipqFHwZ6zEGVB3DCBjCDqELKCDMBBpGEX0nFjGMwMJWlOQ1eNBYMI3KCoqswmUYUAqpMRjCRN3kbFJiA3/aqkMvW8SLjqRhUBNWKc2U3drgV+i4VXEhgBHAtcNKH2a3aXPFpCBDEBYqRuXf2h7FT/LfD4kgJhMbJHCpAd4KnOeZoExfMGbVDtVAv5VkMRhzSA0bHMIrBnmRBZIJDAd3N/MoWdBqrIsVCqMXNhYJChBwSCBqJF7G4GmEMhMHmqyJPQJzv2r6Q+DKCA4M+1G4FXIJ9B63tqQKmHuDDpBnqCGM4WBzv2Bz4JVX1y2qJVJCKlJqAqUWKjqoKJDsJqFvqpJCsI6HBABQIRQ9JF7RAhDL3lw85u7e37Hq7q3u7qvu7q7+7q7u7u7u7e4GCGG2UWiQZCqqomJiYmJiYmJiYl8dHRxdXVxdnByb29vb3BwcHCQkJCQkJCQkJCQj4+Pj4+Pj4+Pj4+Pj4+Ph4eHh4eHh4eHh4eHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcXFxcXFxcXFxcXFxYWFhYWFhYWFhYWJiYmJiYmJiYmJioqKioqKioqKioqKioqKioqKiouLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4g==");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 1000;
+  }
+  .dark body::after {
+    opacity: 0.018;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body::after { display: none; }
+  }
+
+  /* ─── Selection ─────────────────────────────────── */
+  ::selection {
+    @apply bg-stamp-red/20 text-ink;
+  }
+}
+
+@layer components {
+  /* ─── Reading Progress Bar ──────────────────────── */
+  .reading-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    width: var(--reading-progress);
+    background: var(--color-progress-bar);
+    z-index: 100;
+    transition: width 50ms linear;
+  }
+
+  /* ─── Paper texture class (retained for z-index stacking) ── */
+  .paper-texture {
+    position: relative;
+  }
+
+  /* ─── Folder Card ───────────────────────────────── */
+  .folder-card {
+    @apply relative rounded-sm border border-manila-300 bg-manila-100 overflow-hidden;
+    @apply transition-all duration-200 ease-out;
+    box-shadow:
+      0 1px 3px rgba(26, 20, 16, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+  .folder-card:hover {
+    @apply border-manila-400;
+    transform: translateY(-2px);
+  }
+  .dark .folder-card {
+    @apply border-dark-border bg-dark-card;
+    box-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  /* ─── Domain Tab ────────────────────────────────── */
+  .domain-tab {
+    @apply relative px-4 py-2 cursor-pointer font-mono text-sm font-medium;
+    @apply bg-manila-200 text-ink-muted border border-manila-300 border-b-0;
+    @apply rounded-t-md transition-all duration-200;
+  }
+  .domain-tab:hover {
+    @apply bg-manila-100 text-ink;
+  }
+  .domain-tab.active {
+    @apply bg-manila-50 text-ink;
+    transform: translateY(-3px);
+    z-index: 10;
+  }
+  .dark .domain-tab {
+    @apply bg-dark-card text-dark-muted border-dark-border;
+  }
+  .dark .domain-tab.active {
+    @apply bg-dark-bg text-dark-text;
+  }
+
+  /* ─── Severity Stamp ────────────────────────────── */
+  .severity-stamp {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 font-mono text-xs font-bold uppercase tracking-wider;
+    @apply border-2 rounded-sm;
+    transform: rotate(-3deg);
+  }
+  .severity-stamp.animate {
+    animation: stamp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    opacity: 0;
+  }
+
+  /* ─── "CASE READ" stamp overlay ─────────────────── */
+  .case-read-stamp {
+    @apply absolute top-4 right-4 font-mono text-lg font-bold uppercase tracking-widest;
+    @apply text-stamp-red/60 border-2 border-stamp-red/60 px-3 py-1;
+    transform: rotate(-12deg);
+    animation: stampRead 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  /* ─── Bookmark ribbon ──────────────────────────── */
+  .bookmark-ribbon {
+    @apply absolute top-0 right-3 w-6 h-10;
+    background: var(--color-stamp-red);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+    z-index: 20;
+  }
+
+  /* ─── Polaroid card ────────────────────────────── */
+  .polaroid {
+    @apply bg-white p-2 pb-10 shadow-md;
+    transform: rotate(var(--rotate, -2deg));
+    transition: transform 0.3s ease;
+  }
+  .polaroid:hover {
+    transform: rotate(0deg) scale(1.02);
+    z-index: 10;
+  }
+  .dark .polaroid {
+    @apply bg-dark-card;
+  }
+
+  /* ─── Timeline thread ──────────────────────────── */
+  .timeline-thread {
+    @apply absolute left-4 top-0 bottom-0 w-0.5 bg-stamp-red/30;
+  }
+  .timeline-node {
+    @apply relative pl-10;
+  }
+  .timeline-node::before {
+    content: '';
+    @apply absolute left-2.5 top-2 w-3 h-3 rounded-full border-2 border-stamp-red bg-manila-50;
+    z-index: 5;
+  }
+  .timeline-node.trigger::before { @apply bg-stamp-red border-stamp-red; }
+  .timeline-node.escalation::before { @apply bg-stamp-amber border-stamp-amber; }
+  .timeline-node.discovery::before { @apply bg-yellow-500 border-yellow-500; }
+  .timeline-node.mitigation::before { @apply bg-blue-500 border-blue-500; }
+  .timeline-node.resolution::before { @apply bg-stamp-green border-stamp-green; }
+
+  .dark .timeline-thread { @apply bg-stamp-red-muted/30; }
+  .dark .timeline-node::before { @apply bg-dark-bg; }
+
+  /* ─── Metric card ──────────────────────────────── */
+  .metric-card {
+    @apply flex flex-col items-center justify-center p-4 rounded-sm;
+    @apply bg-manila-100 border border-manila-300;
+    @apply font-mono text-center;
+  }
+  .dark .metric-card {
+    @apply bg-dark-card border-dark-border;
+  }
+
+  /* ─── Action item dots ─────────────────────────── */
+  .action-dot {
+    @apply inline-block w-2.5 h-2.5 rounded-full mr-2.5 flex-shrink-0;
+  }
+  .action-dot.done { @apply bg-stamp-green; }
+  .action-dot.in-progress { @apply bg-stamp-amber; }
+  .action-dot.open { @apply bg-stamp-red; }
+
+  /* ─── Context Panel (dynamic sidebar) ──────────── */
+  .context-panel {
+    background: var(--color-paper);
+    border: 1px solid var(--color-paper-darker);
+    padding: 1.25rem;
+    margin-top: 1rem;
+    min-height: 280px;
+    transition: opacity 0.28s ease, transform 0.28s ease;
+    position: relative;
+  }
+  .context-panel.swapping {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .context-panel {
+      transition: none;
+    }
+    .context-panel.swapping {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .context-panel-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-ink);
+    margin-bottom: 4px;
+  }
+  .context-panel-desc {
+    font-size: 12px;
+    color: var(--color-ink-muted);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+
+  /* ─── TOC pill list ────────────────────────────── */
+  .toc-pill {
+    display: block;
+    padding: 6px 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--color-ink-muted);
+    border-left: 2px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .toc-pill:hover {
+    color: var(--color-ink);
+  }
+  .toc-pill.active {
+    border-left-color: var(--color-stamp-red);
+    color: var(--color-ink);
+    background: rgba(155, 27, 27, 0.04);
+  }
+  .dark .toc-pill.active {
+    background: rgba(160, 64, 64, 0.1);
+  }
+
+  /* ─── Context panel sub-components ─────────────── */
+  .cp-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .cp-stat-card {
+    padding: 10px;
+    border: 1px solid var(--color-rule);
+    background: var(--color-paper);
+  }
+  .cp-stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-ink-muted);
+  }
+  .cp-stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+  .cp-stat-note {
+    font-size: 11px;
+    color: var(--color-ink-faint);
+    margin-top: 2px;
+  }
+
+  .cp-node-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border: 1px solid var(--color-rule);
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+  .cp-node-pill .cp-node-label { font-weight: 600; color: var(--color-ink); }
+  .cp-node-pill .cp-node-sub { font-size: 10px; color: var(--color-ink-muted); }
+  .cp-arrow { text-align: center; color: var(--color-ink-faint); font-size: 14px; line-height: 1; padding: 2px 0; }
+
+  .cp-code-block {
+    background: #1a1208;
+    color: #f0e6cc;
+    border-left: 3px solid var(--color-stamp-red);
+    padding: 12px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+    position: relative;
+  }
+  .cp-code-line {
+    position: relative;
+    padding-right: 4px;
+  }
+  .cp-code-callout {
+    background: rgba(192, 57, 43, 0.08);
+  }
+  .cp-code-note {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 10px;
+    color: var(--color-stamp-red);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    padding: 0 4px;
+  }
+  .cp-code-callout:hover .cp-code-note {
+    opacity: 1;
+  }
+
+  .cp-ba-grid {
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .cp-ba-divider {
+    background: var(--color-rule);
+    width: 1px;
+    height: 100%;
+    min-height: 80px;
+  }
+  .cp-ba-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .cp-ba-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .cp-ba-items li {
+    font-size: 11px;
+    color: var(--color-ink);
+    padding: 3px 0;
+    padding-left: 12px;
+    position: relative;
+  }
+  .cp-ba-items li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--color-ink-faint);
+    font-size: 10px;
+  }
+  .cp-ba-note {
+    font-size: 10px;
+    color: var(--color-ink-muted);
+    margin-top: 6px;
+    font-style: italic;
+  }
+}
+
+@layer utilities {
+  /* ─── Scrollbar styling ─────────────────────────── */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(107, 94, 79, 0.3) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(107, 94, 79, 0.3);
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* ─── Prose overrides for case body ─────────────── */
+  .prose-casefile h2 {
+    @apply font-serif text-2xl font-bold mt-10 mb-4 text-ink;
+    @apply border-b border-manila-300 pb-2;
+  }
+  .dark .prose-casefile h2 {
+    @apply text-dark-text border-dark-border;
+  }
+  .prose-casefile h3 {
+    @apply font-serif text-xl font-semibold mt-8 mb-3 text-ink;
+  }
+  .prose-casefile p {
+    @apply text-ink/90 leading-relaxed mb-4;
+  }
+  .dark .prose-casefile p {
+    @apply text-dark-text/90;
+  }
+
+  /* ── Inline code (NOT inside pre) ──────────────── */
+  .prose-casefile code {
+    background: #e8dfc8;
+    color: #5c1a0a;
+    border: 1px solid #c8b898;
+    border-radius: 2px;
+    padding: 2px 6px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+  }
+  .dark .prose-casefile code {
+    background: #2a2018;
+    color: #e8b97a;
+    border-color: #4a3828;
+  }
+
+  /* ── Block code (pre) ──────────────────────────── */
+  .prose-casefile pre {
+    background: #1a1208;
+    color: #f0e6cc;
+    border-left: 3px solid var(--color-stamp-red);
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    border-radius: 0;
+    margin: 1.5rem 0;
+  }
+
+  /* ── Reset inline-code styles inside pre ───────── */
+  .prose-casefile pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: 13px;
+    border-radius: 0;
+    line-height: 1.7;
+  }
+
+  /* ── Lightweight syntax token colours ──────────── */
+  .prose-casefile pre .token-string,
+  .prose-casefile pre .hljs-string    { color: #9fbe76; }
+  .prose-casefile pre .token-keyword,
+  .prose-casefile pre .hljs-keyword   { color: #e8835a; }
+  .prose-casefile pre .token-comment,
+  .prose-casefile pre .hljs-comment   { color: #7a6a52; }
+  .prose-casefile pre .token-number,
+  .prose-casefile pre .hljs-number    { color: #e8c06a; }
+  .prose-casefile pre .token-function,
+  .prose-casefile pre .hljs-title     { color: #d4a56a; }
+
+  .prose-casefile ul, .prose-casefile ol {
+    @apply ml-6 mb-4 space-y-1;
+  }
+  .prose-casefile li {
+    @apply text-ink/90;
+  }
+  .dark .prose-casefile li {
+    @apply text-dark-text/90;
+  }
+  .prose-casefile blockquote {
+    @apply border-l-4 border-stamp-red/40 pl-4 italic text-ink-muted my-4;
+  }
+  .prose-casefile a {
+    @apply text-stamp-red underline decoration-stamp-red/30 hover:decoration-stamp-red;
+  }
+}

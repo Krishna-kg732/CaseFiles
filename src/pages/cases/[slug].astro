@@ -1,0 +1,29 @@
+---
+import CaseLayout from '@layouts/CaseLayout.astro';
+import { getAllCases, getRelatedCases } from '@lib/cases';
+
+export async function getStaticPaths() {
+  const cases = await getAllCases();
+  return cases.map((c) => ({
+    params: { slug: c.slug },
+    props: { entry: c },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const relatedCases = await getRelatedCases(
+  entry.slug,
+  entry.data.systems,
+  3,
+);
+---
+
+<CaseLayout
+  frontmatter={entry.data}
+  slug={entry.slug}
+  body={entry.body}
+  relatedCases={relatedCases}
+>
+  <Content />
+</CaseLayout>

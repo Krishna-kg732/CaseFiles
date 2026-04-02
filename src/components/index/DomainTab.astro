@@ -1,0 +1,22 @@
+---
+interface Props {
+  domain: string;
+  label: string;
+  count?: number;
+  active?: boolean;
+}
+
+const { domain, label, count, active = false } = Astro.props;
+---
+
+<button
+  class={`domain-tab ${active ? 'active' : ''}`}
+  data-domain={domain}
+>
+  {label}
+  {count != null && (
+    <span class="ml-1.5 text-[10px] font-normal text-ink-muted dark:text-dark-muted">
+      ({count})
+    </span>
+  )}
+</button>

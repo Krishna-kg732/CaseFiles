@@ -1,0 +1,140 @@
+---
+// SearchBar is a client-side component; data passed as JSON for fuse.js
+import { getAllCases } from '@lib/cases';
+
+const cases = await getAllCases();
+const searchData = cases.map((c) => ({
+  slug: c.slug,
+  title: c.data.title,
+  summary: c.data.summary,
+  systems: c.data.systems,
+  tags: c.data.tags ?? [],
+  domain: c.data.domain,
+  caseNumber: c.data.caseNumber,
+}));
+---
+
+<div class="relative mb-6">
+  <div class="relative">
+    <svg
+      class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-muted dark:text-dark-muted pointer-events-none"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+    >
+      <circle cx="11" cy="11" r="8" />
+      <path d="M21 21l-4.35-4.35" />
+    </svg>
+    <input
+      type="text"
+      id="search-input"
+      placeholder="Search cases by title, system, or tag..."
+      class="w-full pl-10 pr-4 py-3 bg-manila-100 dark:bg-dark-card border border-manila-300 dark:border-dark-border rounded-sm font-mono text-sm text-ink dark:text-dark-text placeholder:text-ink-muted dark:placeholder:text-dark-muted focus:outline-none focus:border-stamp-red/50 focus:ring-1 focus:ring-stamp-red/20 transition-colors"
+    />
+  </div>
+
+  <!-- Search results dropdown -->
+  <div
+    id="search-results"
+    class="hidden absolute left-0 right-0 top-full mt-1 bg-manila-50 dark:bg-dark-card border border-manila-300 dark:border-dark-border rounded-sm shadow-lg z-40 max-h-64 overflow-y-auto scrollbar-thin"
+  >
+  </div>
+</div>
+
+<!-- Inject search data for client JS -->
+<script
+  id="search-data"
+  type="application/json"
+  set:html={JSON.stringify(searchData)}
+></script>
+
+<script>
+  document.addEventListener('astro:page-load', async () => {
+    const input = document.getElementById('search-input') as HTMLInputElement;
+    const results = document.getElementById('search-results');
+    const dataEl = document.getElementById('search-data');
+    if (!input || !results || !dataEl) return;
+
+    const searchData = JSON.parse(dataEl.textContent ?? '[]');
+
+    // Dynamic import fuse.js
+    const Fuse = (await import('fuse.js')).default;
+    const fuse = new Fuse(searchData, {
+      keys: [
+        { name: 'title', weight: 0.4 },
+        { name: 'summary', weight: 0.2 },
+        { name: 'systems', weight: 0.2 },
+        { name: 'tags', weight: 0.1 },
+        { name: 'caseNumber', weight: 0.1 },
+      ],
+      threshold: 0.4,
+      includeScore: true,
+    });
+
+    input.addEventListener('input', () => {
+      const query = input.value.trim();
+      if (query.length < 2) {
+        results.classList.add('hidden');
+        results.innerHTML = '';
+        // Reset card visibility
+        for (const card of document.querySelectorAll<HTMLElement>('[data-case-card-wrapper]')) {
+          card.style.display = '';
+        }
+        return;
+      }
+
+      const matches = fuse.search(query);
+      const matchedSlugs = new Set(matches.map((m: any) => m.item.slug));
+
+      // Filter visible cards
+      for (const card of document.querySelectorAll<HTMLElement>('[data-case-card-wrapper]')) {
+        const slug = card.querySelector('[data-slug]')?.getAttribute('data-slug');
+        card.style.display = slug && matchedSlugs.has(slug) ? '' : 'none';
+      }
+
+      // Show dropdown results
+      if (matches.length === 0) {
+        results.innerHTML = `
+          <div class="p-4 text-center font-mono text-sm text-ink-muted dark:text-dark-muted">
+            No cases match "${query}"
+          </div>
+        `;
+        results.classList.remove('hidden');
+        return;
+      }
+
+      results.innerHTML = matches
+        .slice(0, 8)
+        .map((m: any) => `
+          <a
+            href="/cases/${m.item.slug}"
+            class="block px-4 py-3 hover:bg-manila-200 dark:hover:bg-dark-border transition-colors border-b border-manila-200 dark:border-dark-border last:border-0"
+          >
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted">#${m.item.caseNumber}</span>
+              <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted uppercase">${m.item.domain}</span>
+            </div>
+            <p class="text-sm font-sans text-ink dark:text-dark-text">${m.item.title}</p>
+          </a>
+        `)
+        .join('');
+      results.classList.remove('hidden');
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!input.contains(e.target as Node) && !results.contains(e.target as Node)) {
+        results.classList.add('hidden');
+      }
+    });
+
+    // Close on Escape
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        results.classList.add('hidden');
+        input.blur();
+      }
+    });
+  });
+</script>

@@ -1,0 +1,28 @@
+---
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-manila-300 dark:border-dark-border mt-auto">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-6 h-6 bg-stamp-red rounded-sm flex items-center justify-center transform -rotate-3">
+          <span class="text-white font-mono font-bold text-[10px]">CF</span>
+        </div>
+        <span class="font-mono text-xs text-ink-muted dark:text-dark-muted">
+          CaseFiles &copy; {year} — Learning from failure, one postmortem at a time.
+        </span>
+      </div>
+
+      <div class="flex items-center gap-4 font-mono text-xs text-ink-muted dark:text-dark-muted">
+        <a href="/rss.xml" class="hover:text-stamp-red transition-colors">
+          RSS Feed
+        </a>
+        <span class="text-manila-300 dark:text-dark-border">|</span>
+        <a href="https://github.com" class="hover:text-stamp-red transition-colors" target="_blank" rel="noopener">
+          GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

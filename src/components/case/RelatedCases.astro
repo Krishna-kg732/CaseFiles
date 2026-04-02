@@ -1,0 +1,49 @@
+---
+import { SEVERITY_COLORS } from '@lib/severity';
+import type { CaseMeta } from '@types/case';
+
+interface Props {
+  cases: Array<{ slug: string; data: CaseMeta }>;
+}
+
+const { cases } = Astro.props;
+---
+
+<div class="folder-card p-5">
+  <h3 class="font-mono text-xs font-bold uppercase tracking-wider text-ink-muted dark:text-dark-muted mb-4 flex items-center gap-2">
+    <span class="w-5 h-0.5 bg-stamp-red"></span>
+    Related Cases
+  </h3>
+
+  <div class="space-y-3">
+    {cases.map((c) => {
+      const colors = SEVERITY_COLORS[c.data.severity];
+      return (
+        <a
+          href={`/cases/${c.slug}`}
+          class="block p-3 rounded-sm bg-manila-50 dark:bg-dark-bg border border-manila-200 dark:border-dark-border hover:border-manila-400 dark:hover:border-dark-muted transition-colors group"
+        >
+          <div class="flex items-center gap-2 mb-1">
+            <span class={`w-2 h-2 rounded-full ${colors.dot}`}></span>
+            <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted">
+              #{c.data.caseNumber}
+            </span>
+            <span class={`font-mono text-[10px] ${colors.text}`}>
+              {c.data.severity}
+            </span>
+          </div>
+          <p class="text-sm font-sans text-ink dark:text-dark-text group-hover:text-stamp-red transition-colors line-clamp-2">
+            {c.data.title}
+          </p>
+          <div class="flex items-center gap-2 mt-1.5">
+            {c.data.systems.slice(0, 2).map((s) => (
+              <span class="font-mono text-[9px] text-ink-muted dark:text-dark-muted bg-manila-200 dark:bg-dark-border px-1 py-0.5 rounded">
+                {s}
+              </span>
+            ))}
+          </div>
+        </a>
+      );
+    })}
+  </div>
+</div>

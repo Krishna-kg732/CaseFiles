@@ -1,0 +1,74 @@
+---
+import type { ActionItem } from '@types/case';
+
+interface Props {
+  items: ActionItem[];
+}
+
+const { items } = Astro.props;
+
+const statusOrder = { open: 0, 'in-progress': 1, done: 2 };
+const sorted = [...items].sort(
+  (a, b) => statusOrder[a.status] - statusOrder[b.status],
+);
+
+const counts = {
+  done: items.filter((i) => i.status === 'done').length,
+  'in-progress': items.filter((i) => i.status === 'in-progress').length,
+  open: items.filter((i) => i.status === 'open').length,
+};
+const progress = items.length > 0 ? Math.round((counts.done / items.length) * 100) : 0;
+---
+
+<div class="space-y-4">
+  <!-- Progress bar -->
+  <div class="flex items-center gap-4 mb-6">
+    <div class="flex-1 bg-manila-300 dark:bg-dark-border rounded-full h-2.5 overflow-hidden">
+      <div
+        class="h-full bg-stamp-green rounded-full transition-all duration-700"
+        style={`width: ${progress}%`}
+      ></div>
+    </div>
+    <span class="font-mono text-xs text-ink-muted dark:text-dark-muted whitespace-nowrap">
+      {counts.done}/{items.length} done
+    </span>
+  </div>
+
+  <!-- Summary badges -->
+  <div class="flex items-center gap-3 mb-4">
+    {counts.open > 0 && (
+      <span class="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-stamp-red">
+        <span class="action-dot open"></span>
+        {counts.open} open
+      </span>
+    )}
+    {counts['in-progress'] > 0 && (
+      <span class="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-stamp-amber">
+        <span class="action-dot in-progress"></span>
+        {counts['in-progress']} in progress
+      </span>
+    )}
+    {counts.done > 0 && (
+      <span class="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-stamp-green">
+        <span class="action-dot done"></span>
+        {counts.done} done
+      </span>
+    )}
+  </div>
+
+  <!-- Item list -->
+  <ul class="space-y-3">
+    {sorted.map((item) => (
+      <li class="flex items-start gap-3 p-3 rounded-sm bg-manila-100/50 dark:bg-dark-card/50 border border-manila-200 dark:border-dark-border">
+        <span class={`action-dot mt-1.5 ${item.status}`}></span>
+        <span class={`text-sm leading-relaxed ${
+          item.status === 'done'
+            ? 'line-through text-ink-muted dark:text-dark-muted'
+            : 'text-ink dark:text-dark-text'
+        }`}>
+          {item.text}
+        </span>
+      </li>
+    ))}
+  </ul>
+</div>

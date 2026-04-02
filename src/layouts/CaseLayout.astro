@@ -1,0 +1,589 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import CaseHeader from '@components/case/CaseHeader.astro';
+import MetaBar from '@components/case/MetaBar.astro';
+import Timeline from '@components/case/Timeline.astro';
+import EvidenceLocker from '@components/case/EvidenceLocker.astro';
+import ActionItems from '@components/case/ActionItems.astro';
+import RelatedCases from '@components/case/RelatedCases.astro';
+import { getReadingTime } from '@lib/reading-time';
+import type { CaseMeta } from '@types/case';
+
+interface Props {
+  frontmatter: CaseMeta;
+  slug: string;
+  body: string;
+  relatedCases: Array<{ slug: string; data: CaseMeta }>;
+}
+
+const { frontmatter, slug, body, relatedCases } = Astro.props;
+const readingTime = getReadingTime(body);
+const ogImageUrl = `/api/og/${slug}.png`;
+
+// Define section names for the TOC
+const tocSections = [
+  { id: 'section-overview', label: 'Overview' },
+  { id: 'section-timeline', label: 'Timeline' },
+  { id: 'section-what-happened', label: 'What Happened' },
+  { id: 'section-root-cause', label: 'Root Cause' },
+  { id: 'section-evidence', label: 'Evidence' },
+  { id: 'section-action-items', label: 'Action Items' },
+];
+---
+
+<BaseLayout
+  title={frontmatter.title}
+  description={frontmatter.summary}
+  ogImage={ogImageUrl}
+  ogType="article"
+>
+  <!-- Reading progress bar -->
+  <div class="reading-progress" id="reading-progress"></div>
+
+  <!-- Font size controls (floating, mobile-only since sidebar exists on desktop) -->
+  <div
+    id="font-controls"
+    class="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-1 bg-manila-100/90 dark:bg-dark-card/90 backdrop-blur-md border border-manila-300 dark:border-dark-border rounded-lg shadow-lg p-2 transition-all duration-300 lg:hidden"
+  >
+    <span class="font-mono text-[9px] text-ink-muted dark:text-dark-muted uppercase tracking-widest mb-1">Text</span>
+    <button data-font-action="increase" class="w-8 h-8 flex items-center justify-center rounded-sm bg-manila-200 dark:bg-dark-border hover:bg-manila-300 dark:hover:bg-dark-border/80 text-ink dark:text-dark-text font-mono text-sm font-bold transition-colors cursor-pointer" aria-label="Increase font size">A+</button>
+    <button data-font-action="decrease" class="w-8 h-8 flex items-center justify-center rounded-sm bg-manila-200 dark:bg-dark-border hover:bg-manila-300 dark:hover:bg-dark-border/80 text-ink dark:text-dark-text font-mono text-xs font-bold transition-colors cursor-pointer" aria-label="Decrease font size">A−</button>
+    <button data-font-action="reset" class="w-8 h-8 flex items-center justify-center rounded-sm bg-manila-200 dark:bg-dark-border hover:bg-manila-300 dark:hover:bg-dark-border/80 text-ink-muted dark:text-dark-muted font-mono text-[10px] transition-colors cursor-pointer" aria-label="Reset font size">↺</button>
+  </div>
+
+  <!-- Mobile TOC strip (horizontal scrollable, pinned below nav) -->
+  <div id="mobile-toc" class="hidden lg:hidden sticky top-16 z-30 bg-manila-50/90 dark:bg-dark-bg/90 backdrop-blur-md border-b border-manila-300 dark:border-dark-border overflow-x-auto scrollbar-thin">
+    <div class="flex items-center gap-1 px-4 py-2 min-w-max">
+      {tocSections.map((s) => (
+        <a
+          href={`#${s.id}`}
+          class="toc-pill whitespace-nowrap border-l-0 border-b-2 border-transparent px-2 py-1"
+          data-toc-mobile={s.id}
+        >
+          {s.label}
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <article id="case-article" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <!-- Section: Overview -->
+    <div id="section-overview">
+      <CaseHeader
+        title={frontmatter.title}
+        caseNumber={frontmatter.caseNumber}
+        severity={frontmatter.severity}
+        status={frontmatter.status}
+        date={frontmatter.date}
+        readingTime={readingTime}
+        tags={frontmatter.tags}
+        slug={slug}
+      />
+      <MetaBar
+        duration={frontmatter.duration}
+        mttr={frontmatter.mttr}
+        affectedUsers={frontmatter.affectedUsers}
+        totalUsers={frontmatter.totalUsers}
+        affectedRegions={frontmatter.affectedRegions}
+        systems={frontmatter.systems}
+      />
+    </div>
+
+    <div class="md:flex md:gap-10 mt-10">
+      <!-- Main content column -->
+      <div class="md:w-[65%]" id="main-content-col">
+        {frontmatter.timeline && frontmatter.timeline.length > 0 && (
+          <section class="mb-12" id="section-timeline">
+            <h2 class="font-serif text-2xl font-bold mb-6 text-ink dark:text-dark-text flex items-center gap-3">
+              <span class="w-8 h-0.5 bg-stamp-red"></span>
+              Timeline
+            </h2>
+            <Timeline events={frontmatter.timeline} />
+          </section>
+        )}
+
+        <!-- MDX Body — sections get IDs via script -->
+        <div id="prose-body" class="prose-casefile max-w-none mb-12">
+          <slot />
+        </div>
+
+        {frontmatter.evidence && frontmatter.evidence.length > 0 && (
+          <section class="mb-12" id="section-evidence">
+            <h2 class="font-serif text-2xl font-bold mb-6 text-ink dark:text-dark-text flex items-center gap-3">
+              <span class="w-8 h-0.5 bg-stamp-red"></span>
+              Evidence Locker
+            </h2>
+            <EvidenceLocker evidence={frontmatter.evidence} />
+          </section>
+        )}
+
+        {frontmatter.actionItems && frontmatter.actionItems.length > 0 && (
+          <section class="mb-12" id="section-action-items">
+            <h2 class="font-serif text-2xl font-bold mb-6 text-ink dark:text-dark-text flex items-center gap-3">
+              <span class="w-8 h-0.5 bg-stamp-red"></span>
+              Action Items
+            </h2>
+            <ActionItems items={frontmatter.actionItems} />
+          </section>
+        )}
+      </div>
+
+      <!-- ═══ Dynamic Context Sidebar ═══ -->
+      <aside class="hidden md:block md:w-[35%] md:sticky md:top-20 md:self-start mt-10 md:mt-0" id="context-sidebar">
+        <!-- Permanent: slim TOC -->
+        <div id="sidebar-permanent" class="folder-card p-3 space-y-0.5">
+          <h4 class="font-mono text-[10px] font-bold uppercase tracking-widest text-ink-muted dark:text-dark-muted mb-2 px-2">
+            Sections
+          </h4>
+          {tocSections.map((s) => (
+            <a href={`#${s.id}`} class="toc-pill" data-toc-link={s.id}>
+              {s.label}
+            </a>
+          ))}
+
+          <!-- Font size controls (desktop) -->
+          <div class="flex items-center gap-1 px-2 pt-3 mt-2 border-t border-manila-200 dark:border-dark-border">
+            <span class="font-mono text-[9px] text-ink-muted dark:text-dark-muted uppercase tracking-widest mr-auto">Font</span>
+            <button data-font-action="decrease" class="w-6 h-6 flex items-center justify-center rounded-sm bg-manila-200 dark:bg-dark-border text-ink dark:text-dark-text font-mono text-[10px] font-bold cursor-pointer hover:bg-manila-300 transition-colors" aria-label="Decrease font size">A−</button>
+            <button data-font-action="increase" class="w-6 h-6 flex items-center justify-center rounded-sm bg-manila-200 dark:bg-dark-border text-ink dark:text-dark-text font-mono text-[10px] font-bold cursor-pointer hover:bg-manila-300 transition-colors" aria-label="Increase font size">A+</button>
+            <button data-font-action="reset" class="w-6 h-6 flex items-center justify-center rounded-sm bg-manila-200 dark:bg-dark-border text-ink-muted dark:text-dark-muted font-mono text-[9px] cursor-pointer hover:bg-manila-300 transition-colors" aria-label="Reset font size">↺</button>
+          </div>
+        </div>
+
+        <!-- Dynamic context panel -->
+        <div id="context-panel" class="context-panel">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- Copy as Markdown -->
+        <button
+          id="copy-markdown-btn"
+          class="w-full folder-card p-3 text-center font-mono text-xs text-ink-muted dark:text-dark-muted hover:text-ink dark:hover:text-dark-text transition-colors cursor-pointer mt-3"
+          data-slug={slug}
+        >
+          📋 Copy as Markdown
+        </button>
+      </aside>
+    </div>
+  </article>
+
+  <script is:inline>
+    document.addEventListener('astro:page-load', () => {
+      const article = document.getElementById('case-article');
+      const proseBody = document.getElementById('prose-body');
+      const contextPanel = document.getElementById('context-panel');
+      const contextSidebar = document.getElementById('context-sidebar');
+      const mainCol = document.getElementById('main-content-col');
+      const fontControls = document.getElementById('font-controls');
+      if (!article || !proseBody) return;
+      let expanded = false;
+
+      // ═══════════════════════════════════════════════
+      // 1. Wrap MDX headings with section IDs
+      // ═══════════════════════════════════════════════
+      const headingMap = {
+        'what-happened': 'section-what-happened',
+        'root-cause': 'section-root-cause',
+        'what-we-did-to-fix-it': 'section-fix',
+        'what-we-should-have-done-differently': 'section-lessons',
+      };
+      for (const h2 of proseBody.querySelectorAll('h2')) {
+        const id = h2.id || h2.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        for (const [pattern, sectionId] of Object.entries(headingMap)) {
+          if (id.includes(pattern)) {
+            // Wrap this heading and its content until the next h2
+            let wrapper = document.getElementById(sectionId);
+            if (!wrapper) {
+              wrapper = document.createElement('div');
+              wrapper.id = sectionId;
+              h2.parentNode.insertBefore(wrapper, h2);
+              let el = h2;
+              while (el) {
+                const next = el.nextElementSibling;
+                wrapper.appendChild(el);
+                if (next && next.tagName === 'H2') break;
+                el = next;
+              }
+            }
+            break;
+          }
+        }
+      }
+
+      // Show mobile TOC if sections exist
+      const mobileToc = document.getElementById('mobile-toc');
+      if (mobileToc && document.querySelectorAll('[id^="section-"]').length > 0) {
+        mobileToc.classList.remove('hidden');
+      }
+
+      // ═══════════════════════════════════════════════
+      // 2. Context panel data
+      // ═══════════════════════════════════════════════
+      const contextPanels = [
+        {
+          trigger: 'section-overview',
+          id: 'panel-system-health',
+          type: 'graph',
+          title: 'System health — baseline',
+          description: 'Normal operating conditions before the incident.',
+          data: {
+            lines: [
+              { label: 'Replication lag', color: '#1a5c2a', points: [95,94,95,94,93,94] },
+              { label: 'Error rate', color: '#1a5c2a', points: [98,98,97,98,99,98] },
+              { label: 'Connection pool', color: '#1a5c2a', points: [30,32,28,35,30,29] },
+            ],
+            annotation: null,
+            threshold: null,
+          }
+        },
+        {
+          trigger: 'section-what-happened',
+          id: 'panel-lag-spike',
+          type: 'graph',
+          title: 'Replication lag — incident onset',
+          description: 'Lag climbs from 0s to 1,380s as analytics job holds transaction open.',
+          data: {
+            lines: [
+              { label: 'Replication lag (s)', color: '#c0392b', points: [98,97,94,80,55,20,8,6,8,10] },
+            ],
+            annotation: { x: 0.42, label: 'Analytics job starts' },
+            threshold: { y: 0.70, label: 'Alert threshold (30s)', color: '#92540a' },
+          }
+        },
+        {
+          trigger: 'section-root-cause',
+          id: 'panel-root-cause',
+          type: 'diagram',
+          title: 'Failure propagation path',
+          description: 'How one blocked transaction cascaded into a full checkout outage.',
+          nodes: [
+            { id: 'a', label: 'Analytics job', sub: 'Long open txn', color: 'amber' },
+            { id: 'b', label: 'WAL apply blocked', sub: 'Replica frozen', color: 'red' },
+            { id: 'c', label: 'Replication lag ↑', sub: '0s → 1,380s', color: 'red' },
+            { id: 'd', label: 'Conn pool exhausted', sub: '50/50 used', color: 'red' },
+            { id: 'e', label: 'Checkout 503s', sub: '98% error rate', color: 'red' },
+          ],
+          edges: [['a','b'],['b','c'],['c','d'],['d','e']],
+        },
+        {
+          trigger: 'section-timeline',
+          id: 'panel-timeline-context',
+          type: 'stat-cluster',
+          title: 'Key numbers',
+          description: '',
+          stats: [
+            { label: 'Time to detect', value: '18m', note: 'from lag onset to first 503' },
+            { label: 'Time to identify', value: '1h 41m', note: 'from first 503 to root cause' },
+            { label: 'Time to mitigate', value: '28m', note: 'root cause to traffic rerouted' },
+            { label: 'Time to resolve', value: '2h 23m', note: 'mitigation to full recovery' },
+          ]
+        },
+        {
+          trigger: 'section-evidence',
+          id: 'panel-query-profile',
+          type: 'code-highlight',
+          title: 'The offending query',
+          description: 'This pattern held a lock on the replica for 23 minutes.',
+          language: 'sql',
+          code: "BEGIN;\n  SELECT *\n  FROM orders\n  WHERE created_at > NOW()\n    - INTERVAL '90 days'\n  ORDER BY created_at DESC;\n  -- 23 min processing...\nCOMMIT;",
+          callouts: [
+            { line: 0, note: 'Explicit txn — blocks WAL' },
+            { line: 3, note: 'Full scan — 40M rows' },
+          ]
+        },
+        {
+          trigger: 'section-action-items',
+          id: 'panel-before-after',
+          type: 'before-after',
+          title: 'Architecture change',
+          description: '',
+          before: {
+            label: 'Before',
+            items: ['App → pg-replica-01 (reads)', 'Analytics → pg-replica-01 (batch)'],
+            note: 'Shared replica — one bad job affects all reads'
+          },
+          after: {
+            label: 'After',
+            items: ['App → pg-replica-01 (reads)', 'Analytics → pg-replica-02 (batch only)'],
+            note: 'Isolated replicas — blast radius contained'
+          }
+        },
+      ];
+
+      const panelMap = new Map();
+      for (const p of contextPanels) { panelMap.set(p.trigger, p); }
+
+      // ═══════════════════════════════════════════════
+      // 3. Panel renderers
+      // ═══════════════════════════════════════════════
+      function esc(s) { return s.replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+      function renderGraph(cfg) {
+        const W = 260, H = 120, PAD = 4;
+        let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;margin:8px 0">`;
+        // grid lines
+        for (let i = 0; i < 4; i++) {
+          const y = PAD + (i * (H - 2*PAD) / 3);
+          svg += `<line x1="${PAD}" y1="${y}" x2="${W-PAD}" y2="${y}" stroke="var(--color-rule)" stroke-width="0.5" stroke-dasharray="3,3"/>`;
+        }
+        // threshold
+        if (cfg.data.threshold) {
+          const ty = PAD + (1 - cfg.data.threshold.y) * (H - 2*PAD);
+          svg += `<line x1="${PAD}" y1="${ty}" x2="${W-PAD}" y2="${ty}" stroke="${cfg.data.threshold.color||'#92540a'}" stroke-width="1" stroke-dasharray="4,3"/>`;
+          svg += `<text x="${W-PAD-2}" y="${ty-4}" text-anchor="end" font-size="8" fill="${cfg.data.threshold.color||'#92540a'}" font-family="monospace">${esc(cfg.data.threshold.label)}</text>`;
+        }
+        // lines
+        for (const line of cfg.data.lines) {
+          const pts = line.points;
+          const coords = pts.map((v, i) => {
+            const x = PAD + (i / (pts.length - 1)) * (W - 2*PAD);
+            const y = PAD + (1 - v/100) * (H - 2*PAD);
+            return `${x},${y}`;
+          }).join(' ');
+          svg += `<polyline points="${coords}" fill="none" stroke="${line.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+        }
+        // annotation
+        if (cfg.data.annotation) {
+          const ax = PAD + cfg.data.annotation.x * (W - 2*PAD);
+          svg += `<line x1="${ax}" y1="${PAD}" x2="${ax}" y2="${H-PAD}" stroke="var(--color-stamp-red)" stroke-width="1" stroke-dasharray="3,2"/>`;
+          svg += `<text x="${ax+3}" y="${PAD+10}" font-size="8" fill="var(--color-stamp-red)" font-family="monospace">${esc(cfg.data.annotation.label)}</text>`;
+        }
+        svg += '</svg>';
+        // legend
+        let legend = '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:4px">';
+        for (const line of cfg.data.lines) {
+          legend += `<span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-ink-muted)"><span style="width:8px;height:3px;background:${line.color};display:inline-block;border-radius:1px"></span>${esc(line.label)}</span>`;
+        }
+        legend += '</div>';
+        return svg + legend;
+      }
+
+      function renderDiagram(cfg) {
+        const colorMap = { amber: 'var(--color-stamp-amber)', red: 'var(--color-stamp-red)', green: 'var(--color-stamp-green)' };
+        let html = '';
+        for (let i = 0; i < cfg.nodes.length; i++) {
+          const n = cfg.nodes[i];
+          const c = colorMap[n.color] || 'var(--color-ink-muted)';
+          html += `<div class="cp-node-pill" style="border-left:3px solid ${c}"><div><div class="cp-node-label">${esc(n.label)}</div><div class="cp-node-sub">${esc(n.sub)}</div></div></div>`;
+          if (i < cfg.nodes.length - 1) html += '<div class="cp-arrow">↓</div>';
+        }
+        return html;
+      }
+
+      function renderStatCluster(cfg) {
+        let html = '<div class="cp-stat-grid">';
+        for (const s of cfg.stats) {
+          html += `<div class="cp-stat-card"><div class="cp-stat-label">${esc(s.label)}</div><div class="cp-stat-value">${esc(s.value)}</div><div class="cp-stat-note">${esc(s.note)}</div></div>`;
+        }
+        html += '</div>';
+        return html;
+      }
+
+      function renderCodeHighlight(cfg) {
+        const lines = cfg.code.split('\n');
+        const calloutLines = new Set((cfg.callouts || []).map(c => c.line));
+        const calloutNotes = {};
+        for (const c of (cfg.callouts || [])) { calloutNotes[c.line] = c.note; }
+        let html = '<div class="cp-code-block">';
+        lines.forEach((line, i) => {
+          const isCo = calloutLines.has(i);
+          html += `<div class="cp-code-line ${isCo ? 'cp-code-callout' : ''}">${esc(line) || '&nbsp;'}${isCo ? `<span class="cp-code-note">${esc(calloutNotes[i])}</span>` : ''}</div>`;
+        });
+        html += '</div>';
+        return html;
+      }
+
+      function renderBeforeAfter(cfg) {
+        let html = '<div class="cp-ba-grid"><div>';
+        html += `<span class="cp-ba-header" style="background:rgba(155,27,27,0.08);color:var(--color-stamp-red)">${esc(cfg.before.label)}</span>`;
+        html += '<ul class="cp-ba-items">';
+        for (const it of cfg.before.items) html += `<li>${esc(it)}</li>`;
+        html += `</ul><div class="cp-ba-note">${esc(cfg.before.note)}</div></div>`;
+        html += '<div class="cp-ba-divider"></div><div>';
+        html += `<span class="cp-ba-header" style="background:rgba(22,101,52,0.08);color:var(--color-stamp-green)">${esc(cfg.after.label)}</span>`;
+        html += '<ul class="cp-ba-items">';
+        for (const it of cfg.after.items) html += `<li>${esc(it)}</li>`;
+        html += `</ul><div class="cp-ba-note">${esc(cfg.after.note)}</div></div></div>`;
+        return html;
+      }
+
+      function renderPanel(cfg) {
+        let title = `<div class="context-panel-title">${esc(cfg.title)}</div>`;
+        let desc = cfg.description ? `<div class="context-panel-desc">${esc(cfg.description)}</div>` : '';
+        let body = '';
+        switch (cfg.type) {
+          case 'graph': body = renderGraph(cfg); break;
+          case 'diagram': body = renderDiagram(cfg); break;
+          case 'stat-cluster': body = renderStatCluster(cfg); break;
+          case 'code-highlight': body = renderCodeHighlight(cfg); break;
+          case 'before-after': body = renderBeforeAfter(cfg); break;
+        }
+        return title + desc + body;
+      }
+
+      // ═══════════════════════════════════════════════
+      // 4. IntersectionObserver — swap panels on scroll
+      // ═══════════════════════════════════════════════
+      let currentPanelId = null;
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function swapPanel(cfg) {
+        if (!contextPanel || !cfg || cfg.id === currentPanelId) return;
+        currentPanelId = cfg.id;
+
+        if (prefersReduced) {
+          contextPanel.innerHTML = renderPanel(cfg);
+          return;
+        }
+        contextPanel.classList.add('swapping');
+        setTimeout(() => {
+          contextPanel.innerHTML = renderPanel(cfg);
+          contextPanel.classList.remove('swapping');
+        }, 280);
+      }
+
+      // Show initial panel
+      const initialCfg = panelMap.get('section-overview');
+      if (contextPanel && initialCfg) {
+        contextPanel.innerHTML = renderPanel(initialCfg);
+        currentPanelId = initialCfg.id;
+      }
+
+      // Build observer
+      const sectionEls = [];
+      for (const [sectionId] of panelMap) {
+        const el = document.getElementById(sectionId);
+        if (el) sectionEls.push(el);
+      }
+
+      if (sectionEls.length > 0 && contextPanel) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                const sId = entry.target.id;
+                const cfg = panelMap.get(sId);
+                if (cfg) swapPanel(cfg);
+
+                // Update TOC active states
+                for (const link of document.querySelectorAll('[data-toc-link], [data-toc-mobile]')) {
+                  const linkId = link.getAttribute('data-toc-link') || link.getAttribute('data-toc-mobile');
+                  link.classList.toggle('active', linkId === sId);
+                }
+              }
+            }
+          },
+          {
+            threshold: 0.3,
+            rootMargin: '-10% 0px -55% 0px',
+          }
+        );
+        for (const el of sectionEls) observer.observe(el);
+      }
+
+      // ═══════════════════════════════════════════════
+      // 5. Font size controls
+      // ═══════════════════════════════════════════════
+      const FONT_SIZES = [14, 16, 18, 20, 22, 24];
+      let fontIndex = parseInt(localStorage.getItem('cf-font-index') || '1', 10);
+      fontIndex = Math.max(0, Math.min(fontIndex, FONT_SIZES.length - 1));
+      applyFontSize();
+
+      function applyFontSize() {
+        if (!proseBody) return;
+        const size = FONT_SIZES[fontIndex];
+        proseBody.style.fontSize = size + 'px';
+        proseBody.style.lineHeight = (size <= 16 ? 1.7 : size <= 20 ? 1.75 : 1.8).toString();
+      }
+
+      for (const btn of document.querySelectorAll('[data-font-action]')) {
+        btn.addEventListener('click', () => {
+          const action = btn.getAttribute('data-font-action');
+          if (action === 'increase' && fontIndex < FONT_SIZES.length - 1) fontIndex++;
+          else if (action === 'decrease' && fontIndex > 0) fontIndex--;
+          else if (action === 'reset') fontIndex = 1;
+          localStorage.setItem('cf-font-index', fontIndex.toString());
+          applyFontSize();
+        });
+      }
+
+      // ═══════════════════════════════════════════════
+      // 6. Reading progress bar + Full-width expansion
+      // ═══════════════════════════════════════════════
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const rect = article.getBoundingClientRect();
+            const scrolled = -rect.top;
+            const total = rect.height - window.innerHeight;
+            const pct = Math.min(100, Math.max(0, (scrolled / total) * 100));
+            document.documentElement.style.setProperty('--reading-progress', pct + '%');
+
+            // Full-width expansion at 45% read progress
+            if (pct > 45 && !expanded) {
+              expanded = true;
+              // Expand article — wider but not edge-to-edge
+              article.style.transition = 'max-width 0.7s ease-out, padding 0.7s ease-out';
+              article.style.maxWidth = '90rem';
+              article.style.paddingLeft = '3rem';
+              article.style.paddingRight = '3rem';
+              // Expand main column to ~75%, leaving right breathing room
+              if (mainCol) {
+                mainCol.style.transition = 'all 0.7s ease-out';
+                mainCol.style.width = '75%';
+                mainCol.style.maxWidth = '55rem';
+              }
+              // Fade out sidebar but keep its space as margin
+              if (contextSidebar) {
+                contextSidebar.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+                contextSidebar.style.opacity = '0';
+                contextSidebar.style.transform = 'translateX(20px)';
+                contextSidebar.style.pointerEvents = 'none';
+              }
+              // Show floating font controls
+              if (fontControls) {
+                fontControls.style.opacity = '1';
+                fontControls.style.pointerEvents = 'auto';
+              }
+            }
+
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+
+      // ═══════════════════════════════════════════════
+      // 7. Mark as read
+      // ═══════════════════════════════════════════════
+      const slug = window.location.pathname.split('/').filter(Boolean).pop() || '';
+      if (slug) {
+        const stored = JSON.parse(localStorage.getItem('read-cases') || '[]');
+        if (!stored.includes(slug)) {
+          stored.push(slug);
+          localStorage.setItem('read-cases', JSON.stringify(stored));
+        }
+      }
+
+      // ═══════════════════════════════════════════════
+      // 8. Copy as Markdown
+      // ═══════════════════════════════════════════════
+      const copyBtn = document.getElementById('copy-markdown-btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+          const el = document.getElementById('prose-body');
+          if (!el) return;
+          try {
+            await navigator.clipboard.writeText(el.innerText);
+            copyBtn.textContent = '✓ Copied!';
+            setTimeout(() => { copyBtn.textContent = '📋 Copy as Markdown'; }, 2000);
+          } catch {
+            copyBtn.textContent = '✗ Failed';
+            setTimeout(() => { copyBtn.textContent = '📋 Copy as Markdown'; }, 2000);
+          }
+        });
+      }
+    });
+  </script>
+</BaseLayout>

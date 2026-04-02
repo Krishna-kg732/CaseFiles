@@ -1,0 +1,142 @@
+---
+import { SEVERITY_COLORS } from '@lib/severity';
+import type { CaseMeta } from '@types/case';
+
+interface Props {
+  slug: string;
+  data: CaseMeta;
+}
+
+const { slug, data } = Astro.props;
+const colors = SEVERITY_COLORS[data.severity];
+const dateStr = data.date.toLocaleDateString('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+// Compute blast radius
+const blastRadius =
+  data.affectedUsers && data.totalUsers
+    ? Math.round((data.affectedUsers / data.totalUsers) * 100)
+    : null;
+---
+
+<a
+  href={`/cases/${slug}`}
+  class="folder-card group block relative"
+  data-slug={slug}
+  transition:name={`case-card-${slug}`}
+  id={`case-card-${slug}`}
+>
+  <!-- Bookmark ribbon (client-side rendered) -->
+  <div class="bookmark-ribbon hidden" data-bookmark-ribbon={slug}></div>
+
+  <!-- "CASE READ" stamp (client-side rendered) -->
+  <div class="case-read-stamp hidden" data-read-stamp={slug}>
+    CASE READ
+  </div>
+
+  <!-- Thumbnail / visual header -->
+  <div class="h-32 bg-gradient-to-br from-manila-200 to-manila-300 dark:from-dark-card dark:to-dark-border relative overflow-hidden">
+    {data.thumbnail ? (
+      <img
+        src={data.thumbnail}
+        alt={data.title}
+        class="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity"
+      />
+    ) : (
+      <div class="absolute inset-0 flex items-center justify-center">
+        <span class="font-mono text-5xl font-bold text-manila-400/40 dark:text-dark-border/40">
+          #{data.caseNumber}
+        </span>
+      </div>
+    )}
+
+    <!-- Severity badge -->
+    <div class={`absolute top-3 left-3 severity-stamp ${colors.bg} ${colors.text} ${colors.border} ${colors.darkBg}`}>
+      <span class={`w-2 h-2 rounded-full ${colors.dot}`}></span>
+      {data.severity}
+    </div>
+
+    <!-- Status indicator -->
+    {data.status !== 'resolved' && (
+      <div class="absolute top-3 right-3 flex items-center gap-1.5 bg-stamp-red/90 text-white px-2 py-0.5 rounded-sm font-mono text-[10px] uppercase tracking-wider">
+        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+        {data.status}
+      </div>
+    )}
+  </div>
+
+  <!-- Card body -->
+  <div class="p-4 space-y-3">
+    <!-- Case number & date -->
+    <div class="flex items-center justify-between">
+      <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted uppercase tracking-widest">
+        Case #{data.caseNumber}
+      </span>
+      <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted">
+        {dateStr}
+      </span>
+    </div>
+
+    <!-- Title -->
+    <h3 class="font-serif font-bold text-lg text-ink dark:text-dark-text leading-snug line-clamp-2 group-hover:text-stamp-red transition-colors">
+      {data.title}
+    </h3>
+
+    <!-- Summary -->
+    <p class="font-sans text-sm text-ink-muted dark:text-dark-muted line-clamp-2 leading-relaxed">
+      {data.summary}
+    </p>
+
+    <!-- Footer meta -->
+    <div class="flex items-center justify-between pt-2 border-t border-manila-200 dark:border-dark-border">
+      <div class="flex items-center gap-3">
+        <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted">
+          ⏱ {data.duration}
+        </span>
+        {blastRadius !== null && (
+          <span class="font-mono text-[10px] text-ink-muted dark:text-dark-muted">
+            💥 {blastRadius}%
+          </span>
+        )}
+      </div>
+
+      <div class="flex items-center gap-1 overflow-hidden max-w-[120px]">
+        {data.systems.slice(0, 2).map((s) => (
+          <span class="font-mono text-[9px] text-ink-muted dark:text-dark-muted bg-manila-200 dark:bg-dark-border px-1.5 py-0.5 rounded truncate">
+            {s}
+          </span>
+        ))}
+        {data.systems.length > 2 && (
+          <span class="font-mono text-[9px] text-ink-muted dark:text-dark-muted">
+            +{data.systems.length - 2}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+</a>
+
+<script>
+  // Client-side: show "CASE READ" stamp and bookmark ribbons
+  document.addEventListener('astro:page-load', () => {
+    const readCases: string[] = JSON.parse(localStorage.getItem('read-cases') || '[]');
+    const bookmarks: string[] = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+
+    for (const stamp of document.querySelectorAll<HTMLElement>('[data-read-stamp]')) {
+      const slug = stamp.dataset.readStamp;
+      if (slug && readCases.includes(slug)) {
+        stamp.classList.remove('hidden');
+      }
+    }
+
+    for (const ribbon of document.querySelectorAll<HTMLElement>('[data-bookmark-ribbon]')) {
+      const slug = ribbon.dataset.bookmarkRibbon;
+      if (slug && bookmarks.includes(slug)) {
+        ribbon.classList.remove('hidden');
+      }
+    }
+  });
+</script>
