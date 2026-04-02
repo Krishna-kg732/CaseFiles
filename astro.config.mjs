@@ -10,11 +10,22 @@ export default defineConfig({
   adapter: vercel({
     webAnalytics: { enabled: true },
   }),
+
   integrations: [
     mdx(),
     tailwind(),
     react(),
   ],
+
+  // 🔥 ADD THIS BLOCK
+  markdown: {
+    syntaxHighlight: 'shiki',
+    shikiConfig: {
+      theme: 'github-dark', // clean + professional
+      wrap: true, // prevents overflow issues
+    },
+  },
+
   vite: {
     ssr: {
       noExternal: ['framer-motion'],

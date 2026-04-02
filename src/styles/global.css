@@ -9,37 +9,57 @@
   /* ─── CSS Custom Properties ─────────────────────── */
   :root {
     --color-manila-paper: #fdf8f0;
-    --color-manila-dark:  #f4ddb2;
-    --color-ink:          #1a1410;
-    --color-ink-muted:    #6b5e4f;
-    --color-ink-faint:    #a89880;
-    --color-stamp-red:    #9b1b1b;
-    --color-stamp-amber:  #b45309;
-    --color-stamp-green:  #166534;
-    --color-folder-bg:    #f5edd8;
-    --color-folder-tab:   #e8d9b8;
+    --color-manila-dark: #f4ddb2;
+    --color-ink: #1a1410;
+    --color-ink-muted: #6b5e4f;
+    --color-ink-faint: #a89880;
+
+    --color-stamp-red: #9b1b1b;
+    --color-stamp-amber: #b45309;
+    --color-stamp-green: #166534;
+
+    --color-folder-bg: #f5edd8;
+    --color-folder-tab: #e8d9b8;
+
     --color-progress-bar: #9b1b1b;
-    --color-paper:        #fdf8f0;
+
+    --color-paper: #fdf8f0;
     --color-paper-darker: #e8d9b8;
-    --color-rule:         #d4c5a8;
-    --reading-progress:   0%;
+
+    --color-rule: #d4c5a8;
+
+    /* 🔥 NEW: Heading system */
+    --heading-primary: #1a1410;
+    /* strong */
+    --heading-secondary: #3b2f24;
+    /* medium */
+    --heading-tertiary: #6b5e4f;
+    /* subtle */
+
+    --reading-progress: 0%;
   }
 
   .dark {
+    /* existing vars... */
+
+    /* 🔥 Heading tokens for dark */
+    --heading-primary: #f8ecd6;
+    --heading-secondary: #e6d3a3;
+    --heading-tertiary: #cbb890;
     --color-manila-paper: #1a1a18;
-    --color-manila-dark:  #2a2520;
-    --color-ink:          #e8e0d4;
-    --color-ink-muted:    #a09888;
-    --color-ink-faint:    #6b6058;
-    --color-stamp-red:    #a04040;
-    --color-stamp-amber:  #a87235;
-    --color-stamp-green:  #2d6a4f;
-    --color-folder-bg:    #242018;
-    --color-folder-tab:   #3d3530;
+    --color-manila-dark: #2a2520;
+    --color-ink: #e8e0d4;
+    --color-ink-muted: #a09888;
+    --color-ink-faint: #6b6058;
+    --color-stamp-red: #a04040;
+    --color-stamp-amber: #a87235;
+    --color-stamp-green: #2d6a4f;
+    --color-folder-bg: #242018;
+    --color-folder-tab: #3d3530;
     --color-progress-bar: #a04040;
-    --color-paper:        #1e1c18;
+    --color-paper: #1e1c18;
     --color-paper-darker: #2a2520;
-    --color-rule:         #3d3530;
+    --color-rule: #3d3530;
   }
 
   /* ─── Base resets & defaults ────────────────────── */
@@ -51,13 +71,16 @@
 
   body {
     @apply text-ink font-sans;
-    background-color: #fdf8f0;
+    background-color: #ffffff;
     min-height: 100vh;
   }
 
   .dark body {
     @apply text-dark-text;
-    background-color: #1a1208;
+    background:
+      radial-gradient(circle at 20% 0%, #1a1208, transparent 40%),
+      radial-gradient(circle at 80% 0%, #140d07, transparent 40%),
+      #070403;
   }
 
   /* Grain overlay — tiny PNG base64, cross-browser reliable */
@@ -72,11 +95,15 @@
     pointer-events: none;
     z-index: 1000;
   }
+
   .dark body::after {
     opacity: 0.018;
   }
+
   @media (prefers-reduced-motion: reduce) {
-    body::after { display: none; }
+    body::after {
+      display: none;
+    }
   }
 
   /* ─── Selection ─────────────────────────────────── */
@@ -86,6 +113,7 @@
 }
 
 @layer components {
+
   /* ─── Reading Progress Bar ──────────────────────── */
   .reading-progress {
     position: fixed;
@@ -109,12 +137,14 @@
     @apply transition-all duration-200 ease-out;
     box-shadow:
       0 1px 3px rgba(26, 20, 16, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+      inset 0 1px 0 rgba(187, 40, 40, 0.5);
   }
+
   .folder-card:hover {
     @apply border-manila-400;
     transform: translateY(-2px);
   }
+
   .dark .folder-card {
     @apply border-dark-border bg-dark-card;
     box-shadow:
@@ -128,17 +158,21 @@
     @apply bg-manila-200 text-ink-muted border border-manila-300 border-b-0;
     @apply rounded-t-md transition-all duration-200;
   }
+
   .domain-tab:hover {
     @apply bg-manila-100 text-ink;
   }
+
   .domain-tab.active {
     @apply bg-manila-50 text-ink;
     transform: translateY(-3px);
     z-index: 10;
   }
+
   .dark .domain-tab {
     @apply bg-dark-card text-dark-muted border-dark-border;
   }
+
   .dark .domain-tab.active {
     @apply bg-dark-bg text-dark-text;
   }
@@ -149,6 +183,7 @@
     @apply border-2 rounded-sm;
     transform: rotate(-3deg);
   }
+
   .severity-stamp.animate {
     animation: stamp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     opacity: 0;
@@ -176,10 +211,12 @@
     transform: rotate(var(--rotate, -2deg));
     transition: transform 0.3s ease;
   }
+
   .polaroid:hover {
     transform: rotate(0deg) scale(1.02);
     z-index: 10;
   }
+
   .dark .polaroid {
     @apply bg-dark-card;
   }
@@ -188,22 +225,44 @@
   .timeline-thread {
     @apply absolute left-4 top-0 bottom-0 w-0.5 bg-stamp-red/30;
   }
+
   .timeline-node {
     @apply relative pl-10;
   }
+
   .timeline-node::before {
     content: '';
     @apply absolute left-2.5 top-2 w-3 h-3 rounded-full border-2 border-stamp-red bg-manila-50;
     z-index: 5;
   }
-  .timeline-node.trigger::before { @apply bg-stamp-red border-stamp-red; }
-  .timeline-node.escalation::before { @apply bg-stamp-amber border-stamp-amber; }
-  .timeline-node.discovery::before { @apply bg-yellow-500 border-yellow-500; }
-  .timeline-node.mitigation::before { @apply bg-blue-500 border-blue-500; }
-  .timeline-node.resolution::before { @apply bg-stamp-green border-stamp-green; }
 
-  .dark .timeline-thread { @apply bg-stamp-red-muted/30; }
-  .dark .timeline-node::before { @apply bg-dark-bg; }
+  .timeline-node.trigger::before {
+    @apply bg-stamp-red border-stamp-red;
+  }
+
+  .timeline-node.escalation::before {
+    @apply bg-stamp-amber border-stamp-amber;
+  }
+
+  .timeline-node.discovery::before {
+    @apply bg-yellow-500 border-yellow-500;
+  }
+
+  .timeline-node.mitigation::before {
+    @apply bg-blue-500 border-blue-500;
+  }
+
+  .timeline-node.resolution::before {
+    @apply bg-stamp-green border-stamp-green;
+  }
+
+  .dark .timeline-thread {
+    @apply bg-stamp-red-muted/30;
+  }
+
+  .dark .timeline-node::before {
+    @apply bg-dark-bg;
+  }
 
   /* ─── Metric card ──────────────────────────────── */
   .metric-card {
@@ -211,6 +270,7 @@
     @apply bg-manila-100 border border-manila-300;
     @apply font-mono text-center;
   }
+
   .dark .metric-card {
     @apply bg-dark-card border-dark-border;
   }
@@ -219,9 +279,18 @@
   .action-dot {
     @apply inline-block w-2.5 h-2.5 rounded-full mr-2.5 flex-shrink-0;
   }
-  .action-dot.done { @apply bg-stamp-green; }
-  .action-dot.in-progress { @apply bg-stamp-amber; }
-  .action-dot.open { @apply bg-stamp-red; }
+
+  .action-dot.done {
+    @apply bg-stamp-green;
+  }
+
+  .action-dot.in-progress {
+    @apply bg-stamp-amber;
+  }
+
+  .action-dot.open {
+    @apply bg-stamp-red;
+  }
 
   /* ─── Context Panel (dynamic sidebar) ──────────── */
   .context-panel {
@@ -233,14 +302,17 @@
     transition: opacity 0.28s ease, transform 0.28s ease;
     position: relative;
   }
+
   .context-panel.swapping {
     opacity: 0;
     transform: translateY(8px);
   }
+
   @media (prefers-reduced-motion: reduce) {
     .context-panel {
       transition: none;
     }
+
     .context-panel.swapping {
       opacity: 1;
       transform: none;
@@ -254,6 +326,7 @@
     color: var(--color-ink);
     margin-bottom: 4px;
   }
+
   .context-panel-desc {
     font-size: 12px;
     color: var(--color-ink-muted);
@@ -273,14 +346,17 @@
     cursor: pointer;
     text-decoration: none;
   }
+
   .toc-pill:hover {
     color: var(--color-ink);
   }
+
   .toc-pill.active {
     border-left-color: var(--color-stamp-red);
     color: var(--color-ink);
     background: rgba(155, 27, 27, 0.04);
   }
+
   .dark .toc-pill.active {
     background: rgba(160, 64, 64, 0.1);
   }
@@ -291,11 +367,13 @@
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
+
   .cp-stat-card {
     padding: 10px;
     border: 1px solid var(--color-rule);
     background: var(--color-paper);
   }
+
   .cp-stat-label {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
@@ -303,12 +381,14 @@
     letter-spacing: 0.08em;
     color: var(--color-ink-muted);
   }
+
   .cp-stat-value {
     font-family: 'Playfair Display', serif;
     font-size: 22px;
     font-weight: 700;
     color: var(--color-ink);
   }
+
   .cp-stat-note {
     font-size: 11px;
     color: var(--color-ink-faint);
@@ -324,9 +404,24 @@
     font-size: 12px;
     margin-bottom: 2px;
   }
-  .cp-node-pill .cp-node-label { font-weight: 600; color: var(--color-ink); }
-  .cp-node-pill .cp-node-sub { font-size: 10px; color: var(--color-ink-muted); }
-  .cp-arrow { text-align: center; color: var(--color-ink-faint); font-size: 14px; line-height: 1; padding: 2px 0; }
+
+  .cp-node-pill .cp-node-label {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .cp-node-pill .cp-node-sub {
+    font-size: 10px;
+    color: var(--color-ink-muted);
+  }
+
+  .cp-arrow {
+    text-align: center;
+    color: var(--color-ink-faint);
+    font-size: 14px;
+    line-height: 1;
+    padding: 2px 0;
+  }
 
   .cp-code-block {
     background: #1a1208;
@@ -341,13 +436,16 @@
     overflow-y: auto;
     position: relative;
   }
+
   .cp-code-line {
     position: relative;
     padding-right: 4px;
   }
+
   .cp-code-callout {
     background: rgba(192, 57, 43, 0.08);
   }
+
   .cp-code-note {
     position: absolute;
     right: 0;
@@ -360,6 +458,7 @@
     white-space: nowrap;
     padding: 0 4px;
   }
+
   .cp-code-callout:hover .cp-code-note {
     opacity: 1;
   }
@@ -370,12 +469,14 @@
     gap: 12px;
     align-items: start;
   }
+
   .cp-ba-divider {
     background: var(--color-rule);
     width: 1px;
     height: 100%;
     min-height: 80px;
   }
+
   .cp-ba-header {
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
@@ -386,11 +487,13 @@
     display: inline-block;
     margin-bottom: 8px;
   }
+
   .cp-ba-items {
     list-style: none;
     padding: 0;
     margin: 0;
   }
+
   .cp-ba-items li {
     font-size: 11px;
     color: var(--color-ink);
@@ -398,6 +501,7 @@
     padding-left: 12px;
     position: relative;
   }
+
   .cp-ba-items li::before {
     content: '→';
     position: absolute;
@@ -405,6 +509,7 @@
     color: var(--color-ink-faint);
     font-size: 10px;
   }
+
   .cp-ba-note {
     font-size: 10px;
     color: var(--color-ink-muted);
@@ -414,37 +519,55 @@
 }
 
 @layer utilities {
+
   /* ─── Scrollbar styling ─────────────────────────── */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: rgba(107, 94, 79, 0.3) transparent;
   }
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: rgba(107, 94, 79, 0.3);
     border-radius: 3px;
   }
+
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
   }
 
   /* ─── Prose overrides for case body ─────────────── */
   .prose-casefile h2 {
-    @apply font-serif text-2xl font-bold mt-10 mb-4 text-ink;
-    @apply border-b border-manila-300 pb-2;
+    @apply font-serif text-2xl font-bold mt-10 mb-4;
+    color: var(--heading-primary);
+    letter-spacing: -0.01em;
   }
+
+  .prose-casefile h3 {
+    @apply font-serif text-xl font-semibold mt-8 mb-3;
+    color: var(--heading-secondary);
+  }
+
+  .prose-casefile h4 {
+    color: var(--heading-tertiary);
+  }
+
   .dark .prose-casefile h2 {
     @apply text-dark-text border-dark-border;
   }
+
   .prose-casefile h3 {
     @apply font-serif text-xl font-semibold mt-8 mb-3 text-ink;
   }
+
   .prose-casefile p {
     @apply text-ink/90 leading-relaxed mb-4;
   }
+
   .dark .prose-casefile p {
     @apply text-dark-text/90;
   }
@@ -459,21 +582,32 @@
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
     font-size: 0.85em;
   }
+
   .dark .prose-casefile code {
     background: #2a2018;
     color: #e8b97a;
     border-color: #4a3828;
   }
 
-  /* ── Block code (pre) ──────────────────────────── */
+  /* ── Code block styling ──────────────────────────── */
   .prose-casefile pre {
-    background: #1a1208;
-    color: #f0e6cc;
-    border-left: 3px solid var(--color-stamp-red);
-    padding: 1.25rem 1.5rem;
+    background: linear-gradient(145deg, #1a1208, #120c05) !important;
+    border-left: 4px solid var(--color-stamp-red);
+    padding: 1.25rem;
+    border-radius: 8px;
     overflow-x: auto;
-    border-radius: 0;
     margin: 1.5rem 0;
+
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.4),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+  }
+
+  /* Let Shiki control text colors */
+  .prose-casefile pre code {
+    background: none;
+    padding: 0;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   /* ── Reset inline-code styles inside pre ───────── */
@@ -489,29 +623,95 @@
 
   /* ── Lightweight syntax token colours ──────────── */
   .prose-casefile pre .token-string,
-  .prose-casefile pre .hljs-string    { color: #9fbe76; }
-  .prose-casefile pre .token-keyword,
-  .prose-casefile pre .hljs-keyword   { color: #e8835a; }
-  .prose-casefile pre .token-comment,
-  .prose-casefile pre .hljs-comment   { color: #7a6a52; }
-  .prose-casefile pre .token-number,
-  .prose-casefile pre .hljs-number    { color: #e8c06a; }
-  .prose-casefile pre .token-function,
-  .prose-casefile pre .hljs-title     { color: #d4a56a; }
+  .prose-casefile pre .hljs-string {
+    color: #9fbe76;
+  }
 
-  .prose-casefile ul, .prose-casefile ol {
+  .prose-casefile pre .token-keyword,
+  .prose-casefile pre .hljs-keyword {
+    color: #e8835a;
+  }
+
+  .prose-casefile pre .token-comment,
+  .prose-casefile pre .hljs-comment {
+    color: #7a6a52;
+  }
+
+  .prose-casefile pre .token-number,
+  .prose-casefile pre .hljs-number {
+    color: #e8c06a;
+  }
+
+  .prose-casefile pre .token-function,
+  .prose-casefile pre .hljs-title {
+    color: #d4a56a;
+  }
+
+  .prose-casefile ul,
+  .prose-casefile ol {
     @apply ml-6 mb-4 space-y-1;
   }
+
   .prose-casefile li {
     @apply text-ink/90;
   }
+
   .dark .prose-casefile li {
     @apply text-dark-text/90;
   }
+
   .prose-casefile blockquote {
     @apply border-l-4 border-stamp-red/40 pl-4 italic text-ink-muted my-4;
   }
+
   .prose-casefile a {
     @apply text-stamp-red underline decoration-stamp-red/30 hover:decoration-stamp-red;
   }
+}
+
+.prose-casefile strong {
+  color: var(--heading-secondary);
+}
+
+.prose-casefile h2,
+.prose-casefile h3 {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.08);
+}
+
+.dark .prose-casefile h2,
+.dark .prose-casefile h3 {
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ── Headings (FIXED for both modes) ───────────────── */
+
+/* LIGHT MODE */
+.prose-casefile h2 {
+  color: #1a1410;
+  /* strong ink */
+  letter-spacing: -0.01em;
+}
+
+.prose-casefile h3 {
+  color: #3b2f24;
+  /* slightly softer */
+  font-weight: 600;
+}
+
+.prose-casefile h4 {
+  color: #6b5e4f;
+  /* muted but visible */
+}
+
+/* DARK MODE */
+.dark .prose-casefile h2 {
+  color: #f8ecd6;
+}
+
+.dark .prose-casefile h3 {
+  color: #e6d3a3;
+}
+
+.dark .prose-casefile h4 {
+  color: #cbb890;
 }
